@@ -1,11 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Author, Book, Member, Loan
-from django.db.models import Count, Q
-from .serializers import AuthorSerializer, BookSerializer, MemberSerializer, LoanSerializer
+from django.db.models import Count, Q, F
+from .serializers import AuthorSerializer, BookSerializer, MemberSerializer, LoanSerializer, TopMemberSerializer
 from rest_framework.decorators import action
 from django.utils import timezone
 from .tasks import send_loan_notification
+from django.http import JsonResponse
 
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
@@ -50,7 +51,7 @@ class MemberViewSet(viewsets.ModelViewSet):
     queryset = Member.objects.all()
     serializer_class = MemberSerializer
 
-    @action(detail=True, methods=['get'])
+    @action(detail=False, methods=['get'])
     def top_active(self, request):
         top_members = Member.objects.annotate(
             active_loans=Count(
@@ -63,7 +64,7 @@ class MemberViewSet(viewsets.ModelViewSet):
             '-active_loans'
         )[:5]
 
-        serializer = TopActiveMemberSerializer(top_members, many=True)
+        serializer = TopMemberSerializer(top_members, many=True)
         return Response(serializer.data)
 
 class LoanViewSet(viewsets.ModelViewSet):
