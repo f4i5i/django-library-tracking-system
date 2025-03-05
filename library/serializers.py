@@ -50,7 +50,7 @@ class LoanSerializer(serializers.ModelSerializer):
 class TopMemberSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
-    active_loans_count = serializers.IntegerField()
+    active_loans = serializers.IntegerField()
 
     class Meta:
         model = Member
