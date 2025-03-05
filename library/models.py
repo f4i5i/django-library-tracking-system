@@ -50,7 +50,10 @@ class Loan(models.Model):
         return f"{self.book.title} loaned to {self.member.user.username}"
 
     def save(self, *args, **kwargs):
-        if not self.pk and not self.due_date:
-            super().save(*args, **kwargs)
+        is_new = self.pk is None
+        if is_new and not self.due_date:
+            if not self.loan_date:
+                from django.utils import timezone
+                self.loan_date = timezone.now().date()
             self.due_date = self.loan_date + timedelta(days=14)
             super().save(*args, **kwargs)
